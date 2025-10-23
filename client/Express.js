@@ -29,7 +29,11 @@ let users = [
 
 // Endpoint GET para devolver los usuarios
 app.get("/api/users", (req, res) => {
-  res.json(users);
+  setTimeout(()=>{
+    res.json(users);
+    //error;
+    //res.status(500).json({error:"Error al obtener los usuarios"});
+  }, 2000);
 });
 
 // Endpoint POST para agregar un usuario
