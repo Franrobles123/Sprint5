@@ -6,6 +6,8 @@ import Navbar from './componentes/Navbar';
 import HomePage from './pages/AboutPage';
 import AboutPage from './pages/DashboardPage';
 import DashboardPage from './pages/HomePages';
+import AddPersonForm from './AddPersonForm';
+
  
 function App() {
   return (
@@ -19,6 +21,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/add" element={<AddPersonForm />} />
         </Routes>
       </main>
     </div>

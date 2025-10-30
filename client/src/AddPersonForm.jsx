@@ -1,63 +1,178 @@
+import { useState, useEffect } from "react";
+import "./AddPersonForm.css"; // estilos del form
 
-function AddPersonForm() {
-  // Maneja el envío del formulario
+// --- API base (si preferís, sacalo a un archivo constants) ---
+const API_BASE = "http://localhost:5000/api";
+
+// --- Helper: verificación de email ---
+async function checkMailExists(email) {
+  const resp = await fetch(`${API_BASE}/check-email`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!resp.ok) {
+    let msg = "Error al verificar el email";
+    try {
+      const data = await resp.json();
+      msg = data?.error || msg;
+    } catch {
+      // si vino HTML por error de ruta, caemos acá
+    }
+    throw new Error(msg);
+  }
+  return resp.json(); // { exists:false }
+}
+
+const initialFormData = {
+  name: "",
+  email: "",
+  image: "https://randomuser.me/api/portraits/men/1.jpg",
+  description: "",
+};
+
+export default function AddPersonForm() {
+  const [formData, setFormData] = useState(initialFormData);
+  const [emailError, setEmailError] = useState("");
+  const [checkingEmail, setCheckingEmail] = useState(false);
+  const [debounceId, setDebounceId] = useState(null);
+  const [submitMsg, setSubmitMsg] = useState("");
+
+  // Validación de email con debounce (400 ms)
+  useEffect(() => {
+    const email = formData.email.trim();
+
+    // limpiar estado si está vacío
+    if (!email) {
+      setEmailError("");
+      if (debounceId) clearTimeout(debounceId);
+      return;
+    }
+
+    if (debounceId) clearTimeout(debounceId);
+    const id = setTimeout(async () => {
+      try {
+        setCheckingEmail(true);
+        await checkMailExists(email);     // 200 -> libre
+        setEmailError("");
+      } catch (err) {                      // 409 -> ya existe
+        setEmailError(err.message || "Error al verificar el email");
+      } finally {
+        setCheckingEmail(false);
+      }
+    }, 400);
+    setDebounceId(id);
+
+    return () => clearTimeout(id);
+  }, [formData.email]);
+
   const handleSubmit = async (event) => {
-    event.preventDefault(); // evita que la página se recargue
+    event.preventDefault();
+    setSubmitMsg("");
 
-    // Capturamos los valores de los campos
-    const name = event.target.name.value;
-    const email = event.target.email.value;
-    const image = event.target.image.value;
-    const description = event.target.description.value;
+    if (checkingEmail || emailError) {
+      setSubmitMsg("Revisá el email antes de guardar.");
+      return;
+    }
 
-    // Enviamos los datos a la API
-    await fetch("http://localhost:5000/api/users", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        image,
-        description,
-      }),
-    });
-
-    // Limpiamos el formulario
-    event.target.reset();
-
-    // Recargamos la página para ver el nuevo usuario
-    window.location.reload();
+    try {
+      const resp = await fetch(`${API_BASE}/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!resp.ok) throw new Error("No se pudo guardar el usuario.");
+      setFormData(initialFormData);
+      setEmailError("");
+      setSubmitMsg("✅ Usuario agregado con éxito");
+    } catch (e) {
+      setSubmitMsg(`❌ ${e.message}`);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor="name">Nombre *</label>
-      <input type="text" id="name" name="name" placeholder="Nombre" required />
+    <div className="form-wrap">
+      <div className="card">
+        <div className="form-header">
+          <h1>Agregar Personas</h1>
+          <div className="subtitle">Completá los campos para crear un registro</div>
+        </div>
 
-      <label htmlFor="email">Email *</label>
-      <input type="email" id="email" name="email" placeholder="Email" required />
+        <div className="hr" />
 
-      <label htmlFor="image">Imagen</label>
-      <input
-        type="text"
-        id="image"
-        name="image"
-        placeholder="URL de la imagen"
-        defaultValue="https://randomuser.me/api/portraits/men/1.jpg"
-      />
+        <form onSubmit={handleSubmit}>
+          <div className="form-grid">
+            <div>
+              <label htmlFor="name">Nombre *</label>
+              <input
+                className="input"
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Nombre"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
 
-      <label htmlFor="description">Descripción</label>
-      <textarea
-        id="description"
-        name="description"
-        placeholder="Descripción"
-      ></textarea>
+            <div>
+              <label htmlFor="email">Email *</label>
+              <input
+                className="input"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="tu@email.com"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+              {checkingEmail && !emailError && (
+                <span className="info">Verificando email…</span>
+              )}
+              {emailError && <span className="error">{emailError}</span>}
+            </div>
 
-      <button type="submit">Agregar Persona</button>
-    </form>
+            <div className="form-row-full">
+              <label htmlFor="image">Imagen</label>
+              <input
+                className="input"
+                type="text"
+                id="image"
+                name="image"
+                placeholder="URL de la imagen"
+                value={formData.image}
+                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+              />
+            </div>
+
+            <div className="form-row-full">
+              <label htmlFor="description">Descripción</label>
+              <textarea
+                className="textarea"
+                id="description"
+                name="description"
+                placeholder="Descripción"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="actions">
+            <button className="btn" type="submit" disabled={!!emailError || checkingEmail}>
+              Agregar Persona
+            </button>
+          </div>
+
+          {submitMsg && <div className="submit-msg">{submitMsg}</div>}
+        </form>
+      </div>
+    </div>
   );
 }
 
-export default AddPersonForm;

@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-let users = [
+const users = [
   {
     name: "Juan",
     email: "juan@example.com",
@@ -41,6 +41,15 @@ app.post("/api/users", (req, res) => {
   const nuevoUsuario = req.body;
   users.push(nuevoUsuario);
   res.json({ message: "Usuario agregado", user: nuevoUsuario });
+});
+app.post("/api/check-email", (req, res) => {
+  const { email } = req.body || {};
+  if (!email || typeof email !== "string") {
+    return res.status(400).json({ error: "Email inválido" });
+  }
+  const exists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+  if (exists) return res.status(409).json({ error: "El correo electrónico ya está en uso" });
+  return res.json({ exists: false });
 });
 
 app.listen(5000, () => {

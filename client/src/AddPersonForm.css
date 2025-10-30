@@ -1,0 +1,163 @@
+/* Fuente opcional (Poppins) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+:root{
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #6366f1;   /* indigo */
+  --primary-600: #575bf0;
+  --danger: #ef4444;
+  --radius: 12px;
+  --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+*{ box-sizing: border-box; }
+
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+/* Barra superior simple */
+.top-nav{
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 20px;
+}
+
+.top-nav a{
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.top-nav a:hover{ text-decoration: underline; }
+
+/* Contenedor centrado */
+.form-wrap{
+  max-width: 640px;
+  margin: 12px auto 80px;
+  padding: 0 16px;
+}
+
+.card{
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+}
+
+/* Título y subtítulo */
+.form-header{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.form-header h1{
+  font-size: 28px;
+  margin: 0;
+  font-weight: 600;
+}
+.form-header .subtitle{
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Línea fina decorativa */
+.hr{
+  height: 1px;
+  background: rgba(100,116,139,0.25);
+  margin: 12px 0 18px;
+}
+
+/* Campos */
+.form-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 18px;
+}
+.form-row-full{ grid-column: 1 / -1; }
+
+label{
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="email"],
+textarea{
+  width: 100%;
+  height: 40px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+textarea{ min-height: 90px; resize: vertical; }
+
+input::placeholder,
+textarea::placeholder{ color: #9aa6b2; }
+
+input:focus,
+textarea:focus{
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+}
+
+/* Error debajo del input */
+.error{
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--danger);
+}
+
+/* Botón */
+.actions{
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+button[type="submit"]{
+  width: 100%;
+  max-width: 320px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: .2px;
+  cursor: pointer;
+  transition: transform .05s ease, background .15s ease, box-shadow .15s ease;
+  box-shadow: 0 6px 18px rgba(99,102,241,.25);
+}
+
+button[type="submit"]:hover{ background: var(--primary-600); }
+button[type="submit"]:active{ transform: translateY(1px); }
+
+button[disabled]{
+  opacity: .6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Responsivo */
+@media (max-width: 640px){
+  .card{ padding: 22px; }
+  .form-grid{ grid-template-columns: 1fr; }
+}
